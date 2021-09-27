@@ -14,41 +14,17 @@ sys.path.append("./")
 sys.path.append("../")
 sys.path.append("../../")
 from ansible_collections.arista.cvp.plugins.module_utils.container_tools import ContainerInput, FIELD_PARENT_NAME
+from lib.parametrize import generate_flat_data
 
 
 # pytest - -html = report.html - -self-contained-html - -cov = . --cov-report = html - -color yes containerInputs.py - v
-
-CVP_CONTAINERS_3_LEVELS = {"DC2": {"parentContainerName": "Tenant"}, "Leafs": {"parentContainerName": "DC2"}, "Spines": {
-    "parentContainerName": "DC2", "configlets": ["01TRAINING-01"]}, "POD01": {"parentContainerName": "Leafs"}}
-
-CVP_CONTAINERS_2_LEVELS = {"DC2": {"parentContainerName": "Tenant"}, "Leafs": {
-    "parentContainerName": "DC2"}, "Spines": {"parentContainerName": "DC2", "configlets": ["01TRAINING-01"]}}
-
-CVP_CONTAINERS_1_LEVELS = {"DC2": {"parentContainerName": "Tenant"}}
-
-CVP_CONTAINERS_01 = {"DC-2": {"parentContainerName": "Tenant"}, "Leafs": {
-    "parentContainerName": "DC-2"}}
-
-
-# Generic helpers
-def time_log():
-    now = datetime.now()
-    return now.strftime("%H:%M:%S")
-
-# ---------------------------------------------------------------------------- #
-#   PARAMETRIZE Management
-# ---------------------------------------------------------------------------- #
-
-def get_cv_container_definition():
-    return [CVP_CONTAINERS_1_LEVELS, CVP_CONTAINERS_2_LEVELS, CVP_CONTAINERS_3_LEVELS, CVP_CONTAINERS_01]
-
 
 # ---------------------------------------------------------------------------- #
 #   FIXTURES Management
 # ---------------------------------------------------------------------------- #
 
 @pytest.fixture()
-@pytest.mark.parametrize('CVP_CONTAINER', get_cv_container_definition())
+@pytest.mark.parametrize('CVP_CONTAINER', generate_flat_data(type='container'))
 def ContainerInput_Creation(request, CVP_CONTAINER):
     logging.info("Execute fixture to create class elements")
     request.cls.inventory = ContainerInput(user_topology=CVP_CONTAINER)
@@ -59,7 +35,7 @@ def ContainerInput_Creation(request, CVP_CONTAINER):
 #   PYTEST
 # ---------------------------------------------------------------------------- #
 
-@pytest.mark.parametrize('CVP_CONTAINER', get_cv_container_definition())
+@pytest.mark.parametrize('CVP_CONTAINER', generate_flat_data(type='container'))
 @pytest.mark.usefixtures("ContainerInput_Creation")
 @pytest.mark.generic
 class TestContainerInput():
